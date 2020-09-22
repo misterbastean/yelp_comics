@@ -15,7 +15,7 @@ const expressSession = require('express-session');
 
 // Config Import
 try {
-	const config = require('./config');
+	var config = require('./config');
 } catch (e) {
 	console.log("Could not import config. This probably means you're not working locally.");
 	console.log(e);
@@ -65,7 +65,7 @@ app.use(express.static('public'));
 
 // Express Session Config
 app.use(expressSession({
-	secret: "sdfoisdfo87vsdfogsfinsfi76sdiuyfgvsdif6vgsdufgvisdfvgsdufyvgd",
+	secret: process.env.ES_SECRET || config.expressSession.secret,
 	resave: false,
 	saveUninitialized: false
 }));
