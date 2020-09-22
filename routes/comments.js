@@ -22,11 +22,12 @@ router.post("/", isLoggedIn, async (req, res) => {
 			text: req.body.text,
 			comicId: req.body.comicId
 		});
-		console.log(comment);
+		req.flash("success", "Comment created!");
 		res.redirect(`/comics/${req.body.comicId}`)
 	} catch (err) {
 		console.log(err);
-		res.send("Broken again... POST comments")
+		req.flash("error", "Error creating comment");
+		res.redirect("/comics");
 	}
 	
 })
@@ -36,12 +37,10 @@ router.get("/:commentId/edit", checkCommentOwner, async (req, res) => {
 	try {
 		const comic = await Comic.findById(req.params.id).exec();
 		const comment = await Comment.findById(req.params.commentId).exec();
-		console.log("comic:", comic)
-		console.log("comment:", comment)
 		res.render("comments_edit", {comic, comment});
 	} catch (err) {
 		console.log(err);
-		res.send("Broke Comment Edit GET")
+		res.redirect("/comics");
 	}
 })
 
@@ -49,11 +48,12 @@ router.get("/:commentId/edit", checkCommentOwner, async (req, res) => {
 router.put("/:commentId", checkCommentOwner, async (req, res) => {
 	try {
 		const comment = await Comment.findByIdAndUpdate(req.params.commentId, {text: req.body.text}, {new: true});
-		console.log(comment);
+		req.flash("success", "Comment edited!")
 		res.redirect(`/comics/${req.params.id}`);
 	} catch (err) {
 		console.log(err);
-		res.send("Brokeeeeee comment PUT")
+		req.flash("error", "Error creating comment")
+		res.redirect("/comics");
 	}
 })
 
@@ -61,11 +61,12 @@ router.put("/:commentId", checkCommentOwner, async (req, res) => {
 router.delete("/:commentId", checkCommentOwner, async (req, res) => {
 	try {
 		const comment = await Comment.findByIdAndDelete(req.params.commentId);
-		console.log(comment);
+		req.flash("success", "Comment deleted!");
 		res.redirect(`/comics/${req.params.id}`);
 	} catch (err) {
 		console.log(err);
-		res.send("Broken again comment DELETE")
+		req.flash("error", "Error deleting comment")
+		res.redirect("/comics");
 	}
 })
 
