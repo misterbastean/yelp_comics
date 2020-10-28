@@ -96,47 +96,50 @@ router.post("/vote", isLoggedIn, async (req, res) => {
 	
 	let response = {}
 	// Voting logic
-	 if (alreadyUpvoted === -1 && alreadyDownvoted === -1) {  // Has not voted
-		 if (req.body.voteType === "up") {  // Upvoting
+	if (alreadyUpvoted === -1 && alreadyDownvoted === -1) {  // Has not voted
+		if (req.body.voteType === "up") {  // Upvoting
 			 comic.upvotes.push(req.user.username);
 			 comic.save()
-			 response.message = "Upvote tallied!"
-		 } else if (req.body.voteType === "down") {  // Downvoting
+			 response = {message: "Upvote tallied!", code: 1}
+		} else if (req.body.voteType === "down") {  // Downvoting
 			 comic.downvotes.push(req.user.username);
 			 comic.save()
-			 response.message = "Downvote tallied!"
-		 } else {  // Error
-			 response.message = "Error 1"
-		 }
-	 } else if (alreadyUpvoted >=0) {  // Already upvoted
-		 if (req.body.voteType === "up") {
+			 response = {message: "Downvote tallied!", code: -1}
+		} else {  // Error
+			 response = {message: "Error 1", code: "err"}
+		}
+	} else if (alreadyUpvoted >=0) {  // Already upvoted
+		if (req.body.voteType === "up") {
 			 comic.upvotes.splice(alreadyUpvoted, 1);
 			 comic.save()
-			 response.message = "Upvote removed";
-		 } else if (req.body.voteType === "down") {
+			 response = {message: "Upvote removed", code: 0}
+		} else if (req.body.voteType === "down") {
 			 comic.upvotes.splice(alreadyUpvoted, 1);
 			 comic.downvotes.push(req.user.username);
 			 comic.save()
-			 response.message = "Changed to downvote"
-		 } else {  // Error
-			 response.message = "Error 2"
-		 }
-	 } else if (alreadyDownvoted >= 0) {  // Already downvoted
-		 if (req.body.voteType === "up") {
+			 response = {message: "Changed to downvote", code: -1};
+		} else {  // Error
+			 response = {message: "Error 2", code: "err"};
+		}
+	} else if (alreadyDownvoted >= 0) {  // Already downvoted
+		if (req.body.voteType === "up") {
 			 comic.downvotes.splice(alreadyDownvoted, 1);
 			 comic.upvotes.push(req.user.username);
 			 comic.save()
-			 response.message = "Changed to upvote"
-		 } else if (req.body.voteType === "down") {
+			 response = {message: "Changed to upvote", code: 1}
+		} else if (req.body.voteType === "down") {
 			 comic.downvotes.splice(alreadyDownvoted, 1);
 			 comic.save()
-			 response.message = "Removed downvote"
-		 } else {  // Error
-			 response.message = "Error 3"
-		 }
-	 } else {  // Error
-		 response.message = "Error 4"
-	 }
+			 response = {message: "Removed downvote", code: 0}
+		} else {  // Error
+			 response = {message: "Error 3", code: "err"}
+		}
+	} else {  // Error
+		response = {message: "Error 4", code: "err"}
+	}
+	
+	// Update score immediately prior to sending
+	response.score = comic.upvotes.length - comic.downvotes.length;
 	
 	res.json(response);
 });
